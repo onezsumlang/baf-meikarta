@@ -99,7 +99,7 @@ const mapWorkHour = [
 ];
 
 const processError = (error) => {
-    console.log(error);
+    // console.log(error);
     if(error.response.status == 401){
         Alert.alert('Authorization Failed', 'Silahkan melakukan login kembali', [
             { 
@@ -126,7 +126,8 @@ const fetchSchedulePattern = dispatch => async () => {
         let abort = axios.CancelToken.source();
         setTimeout(() => { abort.cancel(`Timeout`) }, 5000);
 
-        const response = await easymoveinApi.get('/get_schedule_pattern.php');
+        const response = await easymoveinApi.get('/get_schedule_pattern.php'); 
+        // console.log(response.data);
         await AsyncStorage.setItem('serverSchedulePattern', JSON.stringify(response.data));
         dispatch({ type: 'SCHEDULE_PATTERN_FETCH', payload: response.data });
     } catch (error) {
@@ -147,7 +148,8 @@ const fetchSchedule = dispatch => async () => {
 
         if(block == 'Non Blocks') block = 'non_blocks';
 
-        const response = await easymoveinApi.get('/get_schedule.php?block='+ block);
+        const response = await easymoveinApi.get('/get_schedule.php?block='+ block); 
+        // console.log(response.data);
 
         const data = response.data || [];
         const masterUnit = data.master_unit || [];

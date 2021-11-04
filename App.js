@@ -28,6 +28,7 @@ import ResolveFormScreen from './src/screens/ResolveFormScreen';
 import CheckInScreen from './src/screens/CheckInScreen';
 import MainMenu from './src/screens/catat_meter/MainMenu';
 import UnitList from './src/screens/catat_meter/UnitList';
+import TypeList from './src/screens/catat_meter/TypeList';
 import CheckQR from './src/screens/catat_meter/CheckQR';
 import Form from './src/screens/catat_meter/Form';
 
@@ -72,10 +73,16 @@ const switchNavigator = createSwitchNavigator({
             headerTitle: ()=><Text style={styles.headerTitle}>{'Catat Meter'}</Text>,
           }
         },
+        CM_TypeList: {
+          screen: TypeList,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Meter Reading - Type'}</Text>,
+          }
+        },
         CM_UnitList: {
           screen: UnitList,
           navigationOptions: {
-            headerTitle: ()=><Text style={styles.headerTitle}>{'Meter Reading'}</Text>,
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Meter Reading - Floor'}</Text>,
           }
         },
         CM_CheckQR: {
