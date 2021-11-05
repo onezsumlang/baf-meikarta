@@ -1,6 +1,6 @@
 import _ from "lodash";
 import React, { useContext, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput, Button, Alert, Image } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput, Button, Alert, Image, Modal } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { Context as CatatMeterContext } from "../../context/CatatMeterContext";
 import { Context as AuthContext } from "../../context/AuthContext";
@@ -28,7 +28,8 @@ const Form = ({ navigation }) => {
 
   const [showProblems, setShowProblems] = useState(false);
   const listProblems = _.sortBy(problems, ['label']);
-  const [problemSelected, setProblemSelected] = useState(0);
+  const [problemSelected, setProblemSelected] = useState(null);
+  const [modalProblems, setModalProblems] = useState(false);
 
   const onTakingImage = (data) => {
     handleChange('foto', data.photo);
@@ -57,6 +58,7 @@ const Form = ({ navigation }) => {
 
   const handleProblem = () => {
     setShowProblems(true);
+    setModalProblems(!modalProblems);
   }
 
   return (
@@ -144,6 +146,21 @@ const Form = ({ navigation }) => {
             <Text style={styles.textMD}>: </Text>
             <RegularImagePicker onTakingImage={onTakingImage} size={150}></RegularImagePicker>
           </View>
+          {problemSelected != null &&
+            <View style={[styles.row, { marginTop: 10 }]}>
+              <Text style={[styles.textMD, { width: "30%" }]}>Problem</Text>
+              <Text style={styles.textMD}>: </Text>            
+              <Text style={styles.textMD, {fontWeight: 'bold', fontSize: 16}}>{listProblems[problemSelected].problem}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setProblemSelected(null);
+                }}
+              >
+                <Ionicons name={'ios-trash-bin'} size={20} style={{color: '#d1193e'}}></Ionicons>
+              </TouchableOpacity>
+            </View>
+          }
+          
 
         </View>
         <View style={styles.btnRow}>
@@ -164,38 +181,71 @@ const Form = ({ navigation }) => {
             />
           </View>
         </View>
-        {
-          showProblems && 
-            <View>
-              {listProblems.map((v, key) => {
-                return (
-                  <View key={key} style={styles.box}>
-                    {problemSelected == key ? (
-                      <TouchableOpacity style={styles.btnRadio}>
-                        <Image
-                          style={styles.imgRadio}
-                          source={require('../../../assets/radio_checked.png')}
-                        />
-                        <Text style={styles.labelRadio}>{v.problem}</Text>
-                      </TouchableOpacity>
-                    ) : (
-                      <TouchableOpacity
-                        onPress={() => {
-                          setProblemSelected(key);
-                        }}
-                        style={styles.btnRadio}>
-                        <Image
-                          style={styles.imgRadio}
-                          source={require('../../../assets/radio_unchecked.png')}
-                        />
-                        <Text style={styles.labelRadio}>{v.problem}</Text>
-                      </TouchableOpacity>
-                    )}
+        <View style={styles.row}>
+          <View style={styles.centeredView}>
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalProblems}
+              onRequestClose={() => {
+                setModalProblems(!modalProblems);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  {showProblems && 
+                    <View>
+                      {listProblems.map((v, key) => {
+                        return (
+                          <View key={key} style={styles.box}>
+                            {problemSelected == key ? (
+                              <TouchableOpacity style={styles.btnRadio}>
+                                <Image
+                                  style={styles.imgRadio}
+                                  source={require('../../../assets/radio_checked.png')}
+                                />
+                                <Text style={styles.labelRadio}>{v.problem}</Text>
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => {
+                                  setProblemSelected(key);
+                                }}
+                                style={styles.btnRadio}>
+                                <Image
+                                  style={styles.imgRadio}
+                                  source={require('../../../assets/radio_unchecked.png')}
+                                />
+                                <Text style={styles.labelRadio}>{v.problem}</Text>
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        );
+                      })}
+                    </View>
+                  }
+                  <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '60%'}}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setModalProblems(!modalProblems);
+                      }}
+                      style={[styles.btnRadio, {backgroundColor: '#9DB300', justifyContent: 'center', alignItems: 'center', padding: 10, marginTop: 10, borderRadius: 5, width: 80}]}>
+                      <Text style={{alignSelf: 'center', color: 'white'}}>PILIH</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setModalProblems(!modalProblems);
+                        setProblemSelected(null);
+                      }}
+                      style={[styles.btnRadio, {backgroundColor: '#d1193e', justifyContent: 'center', alignItems: 'center', padding: 10, marginTop: 10, borderRadius: 5, width: 80}]}>
+                      <Text style={{textAlign: 'center', color: 'white'}}>BATAL</Text>
+                    </TouchableOpacity>
                   </View>
-                );
-              })}
-            </View>
-        }
+                </View>
+              </View>
+            </Modal>
+          </View>
+        </View>        
       </ScrollView>
     </>
   )
@@ -281,6 +331,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   labelRadio: {
+    fontSize: 18
+  },
+
+  // modal
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  modalView: {
+    width: '100%',
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  buttonOpen: {
+    backgroundColor: "#F194FF",
+  },
+  buttonClose: {
+    backgroundColor: "#2196F3",
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+    justifyContent: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
     fontSize: 18
   }
 });

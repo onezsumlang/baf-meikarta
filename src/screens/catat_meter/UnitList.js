@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import _ from "lodash";
 import React, { useContext, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, Pressable } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal } from "react-native";
 import { Button } from "react-native-elements";
 import { Context as CatatMeterContext } from "../../context/CatatMeterContext";
 
