@@ -19,6 +19,8 @@ const ScheduleListScreen = ({ navigation, showActiveOnly, parentComponent }) => 
     const defaultTower = uniqTower[0] || '';
     const [activeTower, setActiveTower] = useState(defaultTower);
     const dataUnit = (master_unit || []).filter(v => v.tower == activeTower);
+
+    console.log(dataUnit);
     // console.log((userDetail || {}).data);
     // if(Object.keys(currentShift).length == 0){
     //     return (<>

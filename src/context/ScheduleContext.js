@@ -137,6 +137,7 @@ const fetchSchedulePattern = dispatch => async () => {
 
 const fetchSchedule = dispatch => async () => {
     try {
+        console.log('syncronizing...');
         const token = await AsyncStorage.getItem('token');
         const userDetail = jwtDecode(token);
         
