@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import {Button, Badge} from "react-native-elements";
 import { NavigationEvents, SafeAreaView } from "react-navigation";
 import { Context as AuthContext } from "../../context/AuthContext";
@@ -19,9 +19,26 @@ const MainMenu = ({ navigation }) => {
                         <Button 
                             buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
                             titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
+                            title="METER AIR QC" 
+                            color
+                            onPress={()=> navigation.navigate('CM_QcUnitList', { headerTitle: 'METER AIR READING QC', type: 'Water' })} 
+                        />
+                    </View>
+                    <View style={styles.container}>
+                        <Button 
+                            buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
+                            titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
                             title="METER AIR READING" 
                             color
                             onPress={()=> navigation.navigate('CM_UnitList', { headerTitle: 'METER AIR READING', type: 'Water' })} 
+                        />
+                    </View>
+                    <View style={styles.container}>
+                        <Button 
+                            buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
+                            titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
+                            title="METER LISTRIK QC" 
+                            onPress={()=> navigation.navigate('CM_QcUnitList', { headerTitle: 'METER LISTRIK READING QC', type: 'Electric' })} 
                         />
                     </View>
                     <View style={styles.container}>

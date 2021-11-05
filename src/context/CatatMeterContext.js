@@ -71,10 +71,13 @@ const fetchRecords = dispatch => async () => {
 
       const resElectric = await axios.get('https://easymovein.id/apieasymovein/reading_qr/get_electrics.php?blocks='+ block);
       const resWater = await axios.get('https://easymovein.id/apieasymovein/reading_qr/get_waters.php?blocks='+ block);
+    
+      const resProblem = await axios.get('https://easymovein.id/apieasymovein/reading_qr/get_master_problem_baf.php');
 
       const data = {
         listElectric: resElectric.data.list_electric || [],
         listWater: resWater.data.list_water || [],
+        listProblem: resProblem.data.data_problem || []
       }
 
       await AsyncStorage.setItem('CM_RECORDS', JSON.stringify(data));
@@ -89,6 +92,14 @@ const fetchRecords = dispatch => async () => {
 };
 
 const addCatatMeter = dispatch => async (data) => {
+    const localCM = JSON.parse(await AsyncStorage.getItem('localCM')) || [];
+    const payload = [ ...localCM, data];
+    await AsyncStorage.setItem('localCM', JSON.stringify(payload));
+
+    dispatch({ type: 'SET_LIST_CM', payload})
+}
+
+const addCatatMeterQc = dispatch => async (data) => {
     const localCM = JSON.parse(await AsyncStorage.getItem('localCM')) || [];
     const payload = [ ...localCM, data];
     await AsyncStorage.setItem('localCM', JSON.stringify(payload));
@@ -122,8 +133,8 @@ const doPostCatatMeter = dispatch => async (val) => {
 
 export const { Provider, Context} = createDataContext(
     catatMeterReducer,
-    { doPostCatatMeter, fetchUnits, fetchRecords, addCatatMeter },
+    { doPostCatatMeter, fetchUnits, fetchRecords, addCatatMeter, addCatatMeterQc },
 
     // default state reduce
-    { loading: false, catatMeterUnits: [], listElectric: [], listWater: [], listCatatMeter: [] }
+    { loading: false, catatMeterUnits: [], listElectric: [], listWater: [], listCatatMeter: [], listProblem: [] }
 )

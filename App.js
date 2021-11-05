@@ -28,9 +28,10 @@ import ResolveFormScreen from './src/screens/ResolveFormScreen';
 import CheckInScreen from './src/screens/CheckInScreen';
 import MainMenu from './src/screens/catat_meter/MainMenu';
 import UnitList from './src/screens/catat_meter/UnitList';
-import TypeList from './src/screens/catat_meter/TypeList';
+import QcUnitList from './src/screens/catat_meter/QcUnitList';
 import CheckQR from './src/screens/catat_meter/CheckQR';
 import Form from './src/screens/catat_meter/Form';
+import FormQc from './src/screens/catat_meter/FormQc';
 
 const styles = StyleSheet.create({
   headerTitle: {
@@ -73,16 +74,16 @@ const switchNavigator = createSwitchNavigator({
             headerTitle: ()=><Text style={styles.headerTitle}>{'Catat Meter'}</Text>,
           }
         },
-        CM_TypeList: {
-          screen: TypeList,
+        CM_QcUnitList: {
+          screen: QcUnitList,
           navigationOptions: {
-            headerTitle: ()=><Text style={styles.headerTitle}>{'Meter Reading - Type'}</Text>,
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Meter Reading QC'}</Text>,
           }
         },
         CM_UnitList: {
           screen: UnitList,
           navigationOptions: {
-            headerTitle: ()=><Text style={styles.headerTitle}>{'Meter Reading - Floor'}</Text>,
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Meter Reading'}</Text>,
           }
         },
         CM_CheckQR: {
@@ -95,6 +96,12 @@ const switchNavigator = createSwitchNavigator({
           screen: Form,
           navigationOptions: {
             headerTitle: ()=><Text style={styles.headerTitle}>{'Detail Unit'}</Text>,
+          }
+        },
+        CM_FormQc: {
+          screen: FormQc,
+          navigationOptions: {
+            headerTitle: ()=><Text style={styles.headerTitle}>{'Detail Unit QC'}</Text>,
           }
         }
       }),

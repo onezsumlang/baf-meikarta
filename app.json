@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "baf-meikarta",
+    "name": "BAF Meikarta",
     "slug": "baf-meikarta",
-    "version": "1.1.30.1",
+    "version": "1.1.30.2",
     "orientation": "portrait",
     "icon": "./assets/adaptive-icon_meikarta.png",
     "splash": {
