@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import _ from "lodash";
 import React, { useContext, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, Pressable } from "react-native";
 import { Button } from "react-native-elements";
 import { Context as CatatMeterContext } from "../../context/CatatMeterContext";
 
@@ -9,6 +9,9 @@ const UnitList = ({ navigation }) => {
   const { headerTitle, type } = navigation.state.params;
   const { state } = useContext(CatatMeterContext);
   const { catatMeterUnits, loading } = state;
+
+  // modal for unit type
+  const [modalUnitType, setModalUnitType] = useState(false);
 
   const uniqTower = _.sortBy(_.uniq(_.map(catatMeterUnits, 'tower'))) || [];
   const uniqBlock = _.sortBy(_.uniq(_.map(catatMeterUnits, 'blocks'))) || [];
@@ -22,6 +25,12 @@ const UnitList = ({ navigation }) => {
   const filteredUnits = catatMeterUnits.filter(v => v.block = activeBlock && v.tower == activeTower);
   const uniqFloor = _.sortBy(_.uniq(_.map(filteredUnits, 'floor'))) || [];
 
+  const defaultFloor = uniqFloor[0] || '';
+  const [activeFloor, setActiveFloor] = useState(defaultFloor);
+
+  const filteredUnits2 = catatMeterUnits.filter(v => v.block = activeBlock && v.tower == activeTower && v.floor == activeFloor);
+  const uniqType = _.sortBy(_.uniq(_.map(filteredUnits2, 'tipe'))) || [];
+
   useEffect(() => {
     const getLocalCM = async () => {
       const localCM = JSON.parse(await AsyncStorage.getItem('localCM'));
@@ -29,12 +38,26 @@ const UnitList = ({ navigation }) => {
     getLocalCM();
   }, []);
 
-  const checkStatus = (floor) => {
+  const handleFloor = (v) => {
+    setActiveFloor(v);
+    setModalUnitType(true);
+  }
+
+  const checkStatusFloor = (floor) => {
     const notDone_Water = catatMeterUnits.filter(v => v.ho == 1 && v.floor == floor && v.water != 2);
     const notDone_Electric = catatMeterUnits.filter(v => v.ho == 1 && v.floor == floor && v.electric != 2);
 
     return type == 'Water' ? notDone_Water.length == 0 : notDone_Electric.length == 0;
   }
+
+  const checkStatusType = (type) => {
+    const notDone_Water = catatMeterUnits.filter(v => v.ho == 1 && v.floor == activeFloor && v.tipe == type && v.water != 2);
+    const notDone_Electric = catatMeterUnits.filter(v => v.ho == 1 && v.floor == activeFloor && v.tipe == type && v.electric != 2);
+
+    return type == 'Water' ? notDone_Water.length == 0 : notDone_Electric.length == 0;
+  }
+
+  console.log(catatMeterUnits);
 
   return (
     <>
@@ -62,17 +85,64 @@ const UnitList = ({ navigation }) => {
         </View>
         <View style={styles.row}>
         {uniqFloor.map((v, key) => {
-          const isDone = checkStatus(v);
-          let bgFloor = isDone ? '#548235' : '#f7be14';
+          const isDone = checkStatusFloor(v);
+          let bgFloor = isDone ? '#000000' : '#d1193e';
 
           return <View key={key} style={styles.container}>
             <Button 
               buttonStyle={{ backgroundColor: `${bgFloor}` }}
-              onPress={() => navigation.navigate('CM_CheckQR', { type, block: activeBlock, floor: v })}
+              onPress={() => handleFloor(v)}
+              // onPress={() => navigation.navigate('CM_CheckQR', { type, block: activeBlock, floor: v })}
               title={v}
             />
           </View>
           })}
+        </View>
+        
+        <View style={styles.row}>
+          <View style={styles.centeredView}>
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalUnitType}
+              onRequestClose={() => {
+                setModalUnitType(!modalUnitType);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <Text style={styles.modalText}>{activeBlock} - {activeTower}</Text>
+                  <Text style={styles.modalText}>PILIH TIPE DI LANTAI <Text style={{fontWeight: 'bold'}}>{activeFloor}</Text></Text>
+                  <View style={styles.row}>
+                  {
+                    uniqType.map((v, key) => {
+                      const isDone = checkStatusType(v);
+                      let bgFloor = isDone ? '#9DB300' : '#8ecae6';
+
+                      return <View key={key} style={styles.container}>
+                        <Button
+                          buttonStyle={{backgroundColor: `${bgFloor}`}}
+                          title={v} 
+                          onPress={() => {
+                            setModalUnitType(!modalUnitType);
+                            navigation.navigate('CM_CheckQR', { type, block: activeBlock, tower: activeTower, floor: activeFloor, tipe: v })
+                          }}
+                        />
+                      </View>
+                    })
+                  }
+                  </View>
+                  <Button
+                    buttonStyle={{backgroundColor: '#D1193E'}}
+                    onPress={() => {
+                      setModalUnitType(!modalUnitType);
+                    }}
+                    title="TUTUP" 
+                  />
+                </View>
+              </View>
+            </Modal>
+          </View>
         </View>
       </ScrollView>
     </>
@@ -130,6 +200,47 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: 70,
     marginHorizontal: 5
+  },
+
+  // modal
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22
+  },
+  modalView: {
+    width: '100%',
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  buttonOpen: {
+    backgroundColor: "#F194FF",
+  },
+  buttonClose: {
+    backgroundColor: "#2196F3",
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+    justifyContent: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 18
   }
 });
 

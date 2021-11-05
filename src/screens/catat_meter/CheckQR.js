@@ -5,7 +5,7 @@ import { BarCodeScanner } from 'expo-barcode-scanner';
 import { Context as CatatMeterContext } from "../../context/CatatMeterContext";
 
 const CheckQR = ({ navigation }) => {
-    const { type, block, floor } = navigation.state.params;
+    const { type, block, tower, floor, tipe } = navigation.state.params;
     const { state } = useContext(CatatMeterContext);
     const { catatMeterUnits, listElectric, listWater } = state;
     const listData = type == 'Electric' ? listElectric : listWater
@@ -56,6 +56,7 @@ const CheckQR = ({ navigation }) => {
   // Return the View
   return (<>
     <View style={styles.container}>
+      <Text>Block: {block} - Tower: {tower} - Floor: {floor} - Tipe: {tipe}</Text>
       <View style={styles.barcodebox}>
         <BarCodeScanner
           onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}

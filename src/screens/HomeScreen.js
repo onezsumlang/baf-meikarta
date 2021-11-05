@@ -106,6 +106,7 @@ const HomeScreen = ({ navigation }) => {
     }
     
     const onSyncData = async () => {
+        console.log('syncronizing...');
         // await easymoveinApi.get('/get_pending_report.php?block=' + userDetail.data.absensi_block, { timeout: 10 })
         //     .then(res => console.log(res.status))
         //     .catch(err => console.log(err.message));
