@@ -32,8 +32,11 @@ const CheckQR = ({ navigation }) => {
     // const unitCode = `${splitQR[0]}-${splitQR[1]}-${splitQR[2]}-${splitQR[3]}`; 
     const field = type == 'Electric' ? 'electric_id':'water_id';
     const findUnit = catatMeterUnits.filter(v => v[field] == data && v.floor == floor);
+    // console.log(findUnit);
     if(!findUnit || findUnit.length == 0) return Alert.alert('Info', `QR Code not match for Block ${block} - Floor ${floor}`);
     const history = listData.filter(v => v.unit_code == findUnit[0].unit_code);
+
+    console.log(history);
 
     navigation.navigate('CM_Form', { detailUnit: findUnit, history, type });
   };

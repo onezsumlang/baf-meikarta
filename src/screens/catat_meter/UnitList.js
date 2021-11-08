@@ -57,7 +57,7 @@ const UnitList = ({ navigation }) => {
     return type == 'Water' ? notDone_Water.length == 0 : notDone_Electric.length == 0;
   }
 
-  console.log(catatMeterUnits);
+  // console.log(catatMeterUnits);
 
   return (
     <>

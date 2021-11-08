@@ -1,5 +1,6 @@
 
 import createDataContext from "./createDataContext";
+import easymoveinApi from "../api/easymovein";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 import { navigate } from "../navigationRef";
@@ -92,11 +93,12 @@ const fetchRecords = dispatch => async () => {
 };
 
 const addCatatMeter = dispatch => async (data) => {
-    const localCM = JSON.parse(await AsyncStorage.getItem('localCM')) || [];
-    const payload = [ ...localCM, data];
-    await AsyncStorage.setItem('localCM', JSON.stringify(payload));
+  console.log(data);
+    // const localCM = JSON.parse(await AsyncStorage.getItem('localCM')) || {};
+    // const payload = { ...localCM, data};
+    // await AsyncStorage.setItem('localCM', JSON.stringify(payload));
 
-    dispatch({ type: 'SET_LIST_CM', payload})
+    // dispatch({ type: 'SET_LIST_CM', payload})
 }
 
 const addCatatMeterQc = dispatch => async (data) => {
@@ -110,6 +112,9 @@ const addCatatMeterQc = dispatch => async (data) => {
 const doPostCatatMeter = dispatch => async (val) => {
     try {
         const localCM = await JSON.parse(await AsyncStorage.getItem('localCM')) || [];
+        console.log('show localCM: ');
+        console.log(localCM);
+        console.log(localCM.data);
         // const uploadData = await new Promise.all(localCM.map(async header => {
         //     header.listReportUpload = await new Promise.all(header.listReportUpload.map(async detail => {
         //         const base64 = await FileSystem.readAsStringAsync(detail.photo_before || '', { encoding: 'base64' });
@@ -119,7 +124,26 @@ const doPostCatatMeter = dispatch => async (val) => {
         //     return header;
         // }));
 
-        // const res = await easymoveinApi.post('/post_report_v2.php', JSON.stringify(uploadData));
+        // console.log('doPostCatatMeter');
+
+        // const uploadData = {
+        //   'water' : {
+        //     'unit_code' : '52022-1B-03-03A',
+        //     'bulan'     : '11',
+        //     'tahun'     : '2021',
+        //     'nomor_seri' : '90',
+        //     'pemakaian' : '0',
+        //     'foto'      : '',
+        //     'insert_by' : '',
+        //     'problem'   : ''
+        //   }
+        // };
+
+        if(localCM.length != 0){
+          const res = await easymoveinApi.post('/upload.php', JSON.stringify(localCM.data));
+          console.log(res);
+        }
+        
         // const error = _.union(res.data.error);
         // if(res.data.error > 0) return Alert.alert('Error', error.join('\n\n'));
 

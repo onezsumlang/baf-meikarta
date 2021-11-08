@@ -15,9 +15,9 @@ const Form = ({ navigation }) => {
 
   const { addCatatMeter } = useContext(CatatMeterContext);
 
-  const dataUnit = (detailUnit || [])[0];
-  const listHistory = _.sortBy(history, ['bulan']);
-  const lastInput = listHistory[listHistory.length - 1];
+  const dataUnit = (detailUnit || [])[0]; console.log(history);
+  const listHistory = _.sortBy(history, ['tahun','bulan']); 
+  const lastInput = listHistory[listHistory.length - 1]; console.log(lastInput);
 
   const [showHistory, setShowHistory] = useState(false);
   const [form, setForm] = useState({
@@ -47,7 +47,38 @@ const Form = ({ navigation }) => {
   }
   const doSubmit = async () => {
     if(!validation()) return Alert.alert('Warning', 'Please complete the form');
-    addCatatMeter(form);
+    // addCatatMeter(form);
+    // const uploadData = {
+    //   'water' : {
+    //     'unit_code' : '52022-1B-03-03A',
+    //     'bulan'     : '11',
+    //     'tahun'     : '2021',
+    //     'nomor_seri' : '90',
+    //     'pemakaian' : '0',
+    //     'foto'      : '',
+    //     'insert_by' : '',
+    //     'problem'   : ''
+    //   }
+    // };
+
+    let checkType = type == "Water" ? 'waters' : 'electrics';
+
+    const dataX = {};
+
+    dataX[checkType] = [{
+      "unit_code"   : dataUnit.unit_code,
+      "bulan"       : moment().format('MM'),
+      "tahun"       : moment().format('YYYY'),
+      "nomor_seri"  : form.meteran,
+      "pemakaian"   : form.pemakaian,
+      "foto"        : form.foto,
+      "insert_by"   : 53,
+      "problem"     : 0,
+      "type"        : type,
+      "insert_date" : moment().format('DD-MM-YYYY')
+    }];
+
+    addCatatMeter(dataX);
     navigation.navigate('CM_UnitList');
   }
 
@@ -91,7 +122,7 @@ const Form = ({ navigation }) => {
           listHistory.map((v, k) => {
 
             return <View key={k} style={styles.box}>
-                <Text style={styles.textTimer}>{v.bulan_text}</Text>
+                <Text style={styles.textTimer}>{v.bulan_text} <Text style={{fontSize:9}}>{v.tahun}</Text></Text>
                 <View style={styles.row}>
                   <Text style={[styles.textMD, { width: "30%" }]}>Tanggal Input</Text>
                   <Text style={styles.textMD}>: {v.tanggalinput}</Text>
