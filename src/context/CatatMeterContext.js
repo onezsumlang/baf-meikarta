@@ -158,6 +158,7 @@ const doPostCatatMeter = dispatch => async (val) => {
         // const error = _.union(res.data.error);
         // if(res.data.error > 0) return Alert.alert('Error', error.join('\n\n'));
 
+        // jangan lupa di uncomment
         // await AsyncStorage.removeItem('localCM');
     } catch (error) {
         console.log(error);
