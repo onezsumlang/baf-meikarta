@@ -93,10 +93,20 @@ const fetchRecords = dispatch => async () => {
 };
 
 const addCatatMeter = dispatch => async (data) => {
-  console.log(data);
-    // const localCM = JSON.parse(await AsyncStorage.getItem('localCM')) || {};
+//   console.log(data);
+    // const localCM = JSON.parse(await AsyncStorage.getItem('localCM')) || [];
+
+    // let newLocalCM = localCM;
+    // newLocalCM = [...newLocalCM, data];
+    // data = [...localCM, data];
+
     // const payload = { ...localCM, data};
+    // const payload = data;
     // await AsyncStorage.setItem('localCM', JSON.stringify(payload));
+    
+    // await AsyncStorage.setItem('localCM', JSON.stringify(newLocalCM));
+
+    // console.log(localCM);
 
     // dispatch({ type: 'SET_LIST_CM', payload})
 }
@@ -114,17 +124,17 @@ const doPostCatatMeter = dispatch => async (val) => {
         const localCM = await JSON.parse(await AsyncStorage.getItem('localCM')) || [];
         console.log('show localCM: ');
         console.log(localCM);
-        console.log(localCM.data);
-        // const uploadData = await new Promise.all(localCM.map(async header => {
-        //     header.listReportUpload = await new Promise.all(header.listReportUpload.map(async detail => {
-        //         const base64 = await FileSystem.readAsStringAsync(detail.photo_before || '', { encoding: 'base64' });
-        //         detail.photo = base64;
+        // console.log(localCM.data);
+        // const uploadData = await new Promise.all(localCM.data.map(async header => {
+        //     header.waters = await new Promise.all(header.waters.map(async detail => {
+        //         const base64 = await FileSystem.readAsStringAsync(detail.foto || '', { encoding: 'base64' });
+        //         detail.foto = base64;
         //         return detail;
         //     }));
         //     return header;
         // }));
 
-        // console.log('doPostCatatMeter');
+        // console.log(uploadData);
 
         // const uploadData = {
         //   'water' : {
@@ -139,15 +149,16 @@ const doPostCatatMeter = dispatch => async (val) => {
         //   }
         // };
 
-        if(localCM.length != 0){
-          const res = await easymoveinApi.post('/upload.php', JSON.stringify(localCM.data));
-          console.log(res);
-        }
+        // console.log(localCM.length);
+        // if(localCM.length > 0){
+          const res = await easymoveinApi.post('/upload.php', JSON.stringify(localCM));
+          console.log(res.request.response);
+        // }
         
         // const error = _.union(res.data.error);
         // if(res.data.error > 0) return Alert.alert('Error', error.join('\n\n'));
 
-        await AsyncStorage.removeItem('localCM');
+        // await AsyncStorage.removeItem('localCM');
     } catch (error) {
         console.log(error);
         processError(error);

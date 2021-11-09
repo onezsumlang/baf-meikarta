@@ -7,6 +7,7 @@ import { Context as AuthContext } from "../../context/AuthContext";
 import moment from "moment";
 import RegularImagePicker from "../../components/RegularImagePicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as FileSystem from 'expo-file-system';
 
 const Form = ({ navigation }) => {
   const { detailUnit, history, type } = navigation.state.params;
@@ -15,9 +16,11 @@ const Form = ({ navigation }) => {
 
   const { addCatatMeter } = useContext(CatatMeterContext);
 
-  const dataUnit = (detailUnit || [])[0]; console.log(history);
+  const dataUnit = (detailUnit || [])[0]; 
+  // console.log(history);
   const listHistory = _.sortBy(history, ['tahun','bulan']); 
-  const lastInput = listHistory[listHistory.length - 1]; console.log(lastInput);
+  const lastInput = listHistory[listHistory.length - 1]; 
+  // console.log(lastInput);
 
   const [showHistory, setShowHistory] = useState(false);
   const [form, setForm] = useState({
@@ -26,8 +29,15 @@ const Form = ({ navigation }) => {
     foto: null
   });
 
-  const onTakingImage = (data) => {
-    handleChange('foto', data.photo);
+  const onTakingImage = async (data) => {
+    // const newData = await new Promise.all(data.map(async detail => {
+      const base64 = await FileSystem.readAsStringAsync(data.photo || '', { encoding: 'base64' });
+    //   detail.photo = base64;
+    //   return detail;
+    // }));
+    // let base64 = await FileSystem.readAsStringAsync(data.photo || '', { encoding: 'base64' })
+    // handleChange('foto', newData.photo);
+    handleChange('foto', base64);
   }
 
   const handleChange = (field, value) => {
@@ -48,37 +58,160 @@ const Form = ({ navigation }) => {
   const doSubmit = async () => {
     if(!validation()) return Alert.alert('Warning', 'Please complete the form');
     // addCatatMeter(form);
+
+    // await AsyncStorage.removeItem('localCM');
     // const uploadData = {
-    //   'water' : {
-    //     'unit_code' : '52022-1B-03-03A',
-    //     'bulan'     : '11',
-    //     'tahun'     : '2021',
-    //     'nomor_seri' : '90',
-    //     'pemakaian' : '0',
-    //     'foto'      : '',
-    //     'insert_by' : '',
-    //     'problem'   : ''
-    //   }
+    //   "unit_code"   : dataUnit.unit_code,
+    //   "bulan"       : moment().format('MM'),
+    //   "tahun"       : moment().format('YYYY'),
+    //   "nomor_seri"  : form.meteran,
+    //   "pemakaian"   : form.pemakaian,
+    //   "foto"        : form.foto,
+    //   "insert_by"   : ((userDetail || {}).data || {}).id_user,
+    //   "problem"     : 1,
+    //   "type"        : type,
+    //   "insert_date" : moment().format('DD-MM-YYYY')
     // };
 
     let checkType = type == "Water" ? 'waters' : 'electrics';
 
-    const dataX = {};
+    const dataWaters = checkType == "waters" && {
+      waters : [{
+        "unit_code"   : dataUnit.unit_code,
+        "bulan"       : moment().format('MM'),
+        "tahun"       : moment().format('YYYY'),
+        "nomor_seri"  : form.meteran,
+        "pemakaian"   : form.pemakaian,
+        "foto"        : form.foto,
+        "insert_by"   : ((userDetail || {}).data || {}).id_user,
+        "problem"     : 0,
+        "type"        : type,
+        "insert_date" : moment().format('DD-MM-YYYY')
+      }]
+    };
 
-    dataX[checkType] = [{
-      "unit_code"   : dataUnit.unit_code,
-      "bulan"       : moment().format('MM'),
-      "tahun"       : moment().format('YYYY'),
-      "nomor_seri"  : form.meteran,
-      "pemakaian"   : form.pemakaian,
-      "foto"        : form.foto,
-      "insert_by"   : 53,
-      "problem"     : 0,
-      "type"        : type,
-      "insert_date" : moment().format('DD-MM-YYYY')
-    }];
+    const dataEletrics = checkType !== "waters" && {
+      electrics : [{
+        "unit_code"   : dataUnit.unit_code,
+        "bulan"       : moment().format('MM'),
+        "tahun"       : moment().format('YYYY'),
+        "nomor_seri"  : form.meteran,
+        "pemakaian"   : form.pemakaian,
+        "foto"        : form.foto,
+        "insert_by"   : ((userDetail || {}).data || {}).id_user,
+        "problem"     : 0,
+        "type"        : type,
+        "insert_date" : moment().format('YYYY-MM-DD')
+      }]
+    };
 
-    addCatatMeter(dataX);
+    let data = {};
+
+    data.waters = dataWaters.waters;
+    data.electrics = dataEletrics.electrics;
+
+    const localCM = await JSON.parse(await AsyncStorage.getItem('localCM')) || [];
+
+    
+
+    // let newLocalCM = localCM;
+
+    data = [...localCM, data];
+
+    // console.log(newLocalCM);
+
+    // const payload = { ...localCM, newLocalCM};
+    await AsyncStorage.setItem('localCM', JSON.stringify(data));
+    // console.log(localCM);
+    // console.log(dataWaters);
+
+    // await AsyncStorage.setItem('localCM', JSON.stringify(payload));
+
+    // const waterLocalCM = await new Promise.all(localCM.data.map(async header => {
+    //     header.waters = await new Promise.all(header.waters.map(async detail => {
+    //         const base64 = await FileSystem.readAsStringAsync(detail.foto || '', { encoding: 'base64' });
+    //         detail.foto = base64;
+    //         return detail;
+    //     }));
+    //     return header;
+    // }));
+
+    // console.log(waterLocalCM);
+
+    // let newLocalCM = JSON.parse(localCM);
+    // if (!newLocalCM) {
+    //   newLocalCM = []
+    // }
+
+    // newProduct.push(productToBeSaved);
+
+    // const uploadData = {
+    //   "unit_code"   : dataUnit.unit_code,
+    //   "bulan"       : moment().format('MM'),
+    //   "tahun"       : moment().format('YYYY'),
+    //   "nomor_seri"  : form.meteran,
+    //   "pemakaian"   : form.pemakaian,
+    //   "foto"        : form.foto,
+    //   "insert_by"   : ((userDetail || {}).data || {}).id_user,
+    //   "problem"     : 0,
+    //   "type"        : type,
+    //   "insert_date" : moment().format('DD-MM-YYYY')
+    // };
+
+    // let checkType = type == "Water" ? 'waters' : 'electrics';
+
+
+    
+
+    
+
+    // const waters = checkType == "waters" && [{
+    //   "unit_code"   : dataUnit.unit_code,
+    //   "bulan"       : moment().format('MM'),
+    //   "tahun"       : moment().format('YYYY'),
+    //   "nomor_seri"  : form.meteran,
+    //   "pemakaian"   : form.pemakaian,
+    //   "foto"        : form.foto,
+    //   "insert_by"   : ((userDetail || {}).data || {}).id_user,
+    //   "problem"     : 0,
+    //   "type"        : type,
+    //   "insert_date" : moment().format('DD-MM-YYYY')
+    // }];
+
+    // const electrics = checkType == "electrics" && [{
+    //   "unit_code"   : dataUnit.unit_code,
+    //   "bulan"       : moment().format('MM'),
+    //   "tahun"       : moment().format('YYYY'),
+    //   "nomor_seri"  : form.meteran,
+    //   "pemakaian"   : form.pemakaian,
+    //   "foto"        : form.foto,
+    //   "insert_by"   : ((userDetail || {}).data || {}).id_user,
+    //   "problem"     : 0,
+    //   "type"        : type,
+    //   "insert_date" : moment().format('DD-MM-YYYY')
+    // }];
+
+    // const dataUpload = {
+    //   waters, electrics
+    // };
+
+    // console.log(dataUpload);
+
+    // dataX[checkType] = [{
+    //   "unit_code"   : dataUnit.unit_code,
+    //   "bulan"       : moment().format('MM'),
+    //   "tahun"       : moment().format('YYYY'),
+    //   "nomor_seri"  : form.meteran,
+    //   "pemakaian"   : form.pemakaian,
+    //   "foto"        : form.foto,
+    //   "insert_by"   : 53,
+    //   "problem"     : 0,
+    //   "type"        : type,
+    //   "insert_date" : moment().format('DD-MM-YYYY')
+    // }];
+
+    // addCatatMeter(type == "Water" ? dataWaters : dataEletrics);
+    addCatatMeter(data);
     navigation.navigate('CM_UnitList');
   }
 

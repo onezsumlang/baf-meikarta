@@ -128,8 +128,10 @@ const HomeScreen = ({ navigation }) => {
 
                 await fetchUnits();
                 await fetchRecords();
-
+                
+                console.log('check doPostCatatMeter');
                 await doPostCatatMeter();
+                console.log('done check doPostCatatMeter');
 
                 await localToState();
             } else {
