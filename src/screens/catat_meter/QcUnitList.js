@@ -75,7 +75,7 @@ const QcUnitList = ({ navigation }) => {
 
     // console.log(problems);
 
-    navigation.navigate('CM_FormQc', { detailUnit: findUnit, history, type, problems });
+    navigation.navigate('CM_FormQc', { detailUnit: findUnit, history, type, problems, block: activeBlock, tower: activeTower, floor: activeFloor, tipe });
   }
 
   // console.log(catatMeterUnits);

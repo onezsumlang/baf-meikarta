@@ -1,5 +1,5 @@
 import _ from "lodash";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, TextInput, Button, Alert, Image, Modal } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { Context as CatatMeterContext } from "../../context/CatatMeterContext";
@@ -7,16 +7,19 @@ import { Context as AuthContext } from "../../context/AuthContext";
 import moment from "moment";
 import RegularImagePicker from "../../components/RegularImagePicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BarCodeScanner } from 'expo-barcode-scanner';
 
 const Form = ({ navigation }) => {
-  const { detailUnit, history, type, problems } = navigation.state.params;
+  const { detailUnit, history, type, problems, block, tower, floor, tipe } = navigation.state.params;
   const { state: authState } = useContext(AuthContext);
   const { userDetail } = authState;
 
-  const { addCatatMeter } = useContext(CatatMeterContext);
+  const { state, addCatatMeter } = useContext(CatatMeterContext);
+  const { catatMeterUnits, listElectric, listWater, listProblem, loading } = state;
+  const listData = type == 'Electric' ? listElectric : listWater;
 
   const dataUnit = (detailUnit || [])[0];
-  const listHistory = _.sortBy(history, ['bulan']);
+  const listHistory = _.sortBy(history, ['tahun','bulan']);
   const lastInput = listHistory[listHistory.length - 1];
 
   const [showHistory, setShowHistory] = useState(false);
@@ -30,6 +33,62 @@ const Form = ({ navigation }) => {
   const listProblems = _.sortBy(problems, ['label']);
   const [problemSelected, setProblemSelected] = useState(null);
   const [modalProblems, setModalProblems] = useState(false);
+
+  const idxNoScan = [1,2,3,15,16,17];
+  // console.log(listProblems);
+
+  const [modalCheckQr, setModalCheckQr] = useState(false);
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
+
+  const askForCameraPermission = () => {
+    (async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })()
+  }
+
+  // Request Camera Permission
+  useEffect(() => {
+    askForCameraPermission();
+  }, []);
+
+  const handleBarCodeScanned = async ({ data }) => {
+    setScanned(true);
+    // const splitQR = data.split('-');
+    // const unitCode = `${splitQR[0]}-${splitQR[1]}-${splitQR[2]}-${splitQR[3]}`; 
+    const field = type == 'Electric' ? 'electric_id':'water_id';
+    const findUnit = catatMeterUnits.filter(v => v[field] == data && v.floor == floor);
+    // console.log(findUnit);
+    if(!findUnit || findUnit.length == 0) {
+      setModalCheckQr(!modalCheckQr);
+      setScanned(false);
+      return Alert.alert('Info', `QR Code not match for Block ${block} - Floor ${floor}`);
+    }
+    const history = listData.filter(v => v.unit_code == findUnit[0].unit_code);
+
+    // console.log(history);
+
+    Alert.alert('Info', 'Data Saved!');
+    doSubmit();
+
+    // navigation.navigate('CM_QcUnitList');
+  };
+
+  // Check permissions and return the screens
+  if (hasPermission === null) {
+    return (
+      <View style={styles.container}>
+        <Text>Requesting for camera permission</Text>
+      </View>)
+  }
+  if (hasPermission === false) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ margin: 10 }}>No access to camera</Text>
+        <Button title={'Allow Camera'} onPress={() => askForCameraPermission()} />
+      </View>)
+  }
 
   const onTakingImage = (data) => {
     handleChange('foto', data.photo);
@@ -52,14 +111,63 @@ const Form = ({ navigation }) => {
   }
   const doSubmit = async () => {
     if(!validation()) return Alert.alert('Warning', 'Please complete the form');
-    addCatatMeter(form);
-    navigation.navigate('CM_UnitList');
+    // addCatatMeter(form);
+
+    let checkType = type == "Water" ? 'waters' : 'electrics';
+
+    const dataWaters = checkType == "waters" && {
+      waters : [{
+        "unit_code"   : dataUnit.unit_code,
+        "bulan"       : moment().format('MM'),
+        "tahun"       : moment().format('YYYY'),
+        "nomor_seri"  : form.meteran,
+        "pemakaian"   : form.pemakaian,
+        "foto"        : form.foto,
+        "insert_by"   : ((userDetail || {}).data || {}).id_user,
+        "problem"     : 0,
+        "type"        : "QC",
+        "idx_problem" : listProblems[problemSelected].idx,
+        "insert_date" : moment().format('YYYY-MM-DD HH:mm:ss')
+      }]
+    };
+
+    const dataEletrics = checkType !== "waters" && {
+      electrics : [{
+        "unit_code"   : dataUnit.unit_code,
+        "bulan"       : moment().format('MM'),
+        "tahun"       : moment().format('YYYY'),
+        "nomor_seri"  : form.meteran,
+        "pemakaian"   : form.pemakaian,
+        "foto"        : form.foto,
+        "insert_by"   : ((userDetail || {}).data || {}).id_user,
+        "problem"     : 0,
+        "type"        : "QC",
+        "idx_problem" : listProblems[problemSelected].idx,
+        "insert_date" : moment().format('YYYY-MM-DD HH:mm:ss')
+      }]
+    };
+
+    let data = {};
+
+    data.waters_problem = dataWaters.waters;
+    data.electrics_problem = dataEletrics.electrics;
+
+    const localCM = await JSON.parse(await AsyncStorage.getItem('localCM')) || [];  
+
+    data = [...localCM, data];
+
+    await AsyncStorage.setItem('localCM', JSON.stringify(data));
+
+    addCatatMeter(data);
+    navigation.navigate('CM_QcUnitList');
   }
 
   const handleProblem = () => {
     setShowProblems(true);
     setModalProblems(!modalProblems);
   }
+
+  // console.log(form);
 
   return (
     <>
@@ -101,7 +209,7 @@ const Form = ({ navigation }) => {
           listHistory.map((v, k) => {
 
             return <View key={k} style={styles.box}>
-                <Text style={styles.textTimer}>{v.bulan_text}</Text>
+                <Text style={styles.textTimer}>{v.bulan_text} <Text style={{fontSize:9}}>{v.tahun}</Text></Text>
                 <View style={styles.row}>
                   <Text style={[styles.textMD, { width: "30%" }]}>Tanggal Input</Text>
                   <Text style={styles.textMD}>: {v.tanggalinput}</Text>
@@ -150,7 +258,7 @@ const Form = ({ navigation }) => {
             <View style={[styles.row, { marginTop: 10 }]}>
               <Text style={[styles.textMD, { width: "30%" }]}>Problem</Text>
               <Text style={styles.textMD}>: </Text>            
-              <Text style={styles.textMD, {fontWeight: 'bold', fontSize: 16}}>{listProblems[problemSelected].problem}</Text>
+              <Text style={styles.textMD, {fontWeight: 'bold', fontSize: 16}}>{listProblems[problemSelected].idx} {listProblems[problemSelected].problem}</Text>
               <TouchableOpacity
                 onPress={() => {
                   setProblemSelected(null);
@@ -169,7 +277,17 @@ const Form = ({ navigation }) => {
               buttonStyle={{width: '50%'}}
               color="#72cc50"
               title="OK"
-              onPress={() => doSubmit()}
+              // onPress={() => doSubmit()}
+              onPress={() => {
+                const noScan = idxNoScan.filter(element => element == listProblems[problemSelected].idx);
+                // console.log(noScan);
+                if(noScan.length > 0 ){
+                  doSubmit();
+                }else{
+                  setModalCheckQr(true);
+                }              
+              }
+              }
             />
           </View>
           <View style={styles.btnContainer}>
@@ -240,6 +358,36 @@ const Form = ({ navigation }) => {
                       style={[styles.btnRadio, {backgroundColor: '#d1193e', justifyContent: 'center', alignItems: 'center', padding: 10, marginTop: 10, borderRadius: 5, width: 80}]}>
                       <Text style={{textAlign: 'center', color: 'white'}}>BATAL</Text>
                     </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </Modal>
+
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalCheckQr}
+              onRequestClose={() => {
+                setModalCheckQr(!modalCheckQr);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  <View style={{padding:2, alignItems:'center', justifyContent:'center'}}>
+                    <Text style={{alignItems:'center', justifyContent:'center'}}>Block: {block} - Tower: {tower} - Floor: {floor} - Tipe: {tipe}</Text>
+                    <View style={styles.barcodebox}>
+                      <BarCodeScanner
+                        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+                        style={{width: 600, height: 600}}
+                      />
+                    </View>
+                    <Button
+                      buttonStyle={{backgroundColor: '#D1193E'}}
+                      onPress={() => {
+                        setModalCheckQr(!modalCheckQr);
+                      }}
+                      title="TUTUP" 
+                    />
                   </View>
                 </View>
               </View>
@@ -346,7 +494,7 @@ const styles = StyleSheet.create({
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 35,
+    // padding: 35,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -373,6 +521,20 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: "center",
     fontSize: 18
+  },
+
+  //barcode
+  
+  barcodebox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 400,
+    height: '80%',
+    overflow: 'hidden',
+    borderRadius: 30,
+    borderWidth: 1,
+    backgroundColor: 'tomato',
+    marginBottom: 10
   }
 });
 

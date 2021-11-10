@@ -36,6 +36,7 @@
     "react-native-elements": "^3.4.2",
     "react-native-fs": "^2.18.0",
     "react-native-gesture-handler": "~1.10.2",
+    "react-native-image-resizer": "^1.4.5",
     "react-native-reanimated": "^2.2.0",
     "react-native-redash": "^16.1.1",
     "react-native-safe-area-context": "3.2.0",

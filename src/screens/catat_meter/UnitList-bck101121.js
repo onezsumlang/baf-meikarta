@@ -5,11 +5,10 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal } from "rea
 import { Button } from "react-native-elements";
 import { Context as CatatMeterContext } from "../../context/CatatMeterContext";
 
-const QcUnitList = ({ navigation }) => {
+const UnitList = ({ navigation }) => {
   const { headerTitle, type } = navigation.state.params;
   const { state } = useContext(CatatMeterContext);
-  const { catatMeterUnits, listElectric, listWater, listProblem, loading } = state;
-  const listData = type == 'Electric' ? listElectric : listWater;
+  const { catatMeterUnits, loading } = state;
 
   // modal for unit type
   const [modalUnitType, setModalUnitType] = useState(false);
@@ -56,26 +55,6 @@ const QcUnitList = ({ navigation }) => {
     const notDone_Electric = catatMeterUnits.filter(v => v.ho == 1 && v.floor == activeFloor && v.tipe == type && v.electric != 2);
 
     return type == 'Water' ? notDone_Water.length == 0 : notDone_Electric.length == 0;
-  }
-
-  const handleTipe = (tipe) => {
-    const labelUnitCode = activeBlock+'-'+activeTower+'-'+activeFloor+'-'+activeFloor+tipe;
-
-    const labelField = type == 'Electric' ? 'E' : 'A';
-    const field = type == 'Electric' ? 'electric_id':'water_id';
-
-    const fieldProblem = type == 'Electric' ? 'electric' : 'water';
-
-    const labelFieldCode = activeBlock+'-'+activeTower+'-'+activeFloor+tipe+'-'+labelField;
-    setModalUnitType(!modalUnitType);
-    const findUnit = catatMeterUnits.filter(v => v[field] == labelFieldCode && v.blocks == activeBlock && v.tower == activeTower && v.floor == activeFloor && v.tipe == tipe);
-    const history = listData.filter(v => v.unit_code == labelUnitCode);
-
-    const problems = listProblem.filter(v => v.meter == fieldProblem);
-
-    // console.log(problems);
-
-    navigation.navigate('CM_Form', { detailUnit: findUnit, history, type, problems, block: activeBlock, tower: activeTower, floor: activeFloor, tipe });
   }
 
   // console.log(catatMeterUnits);
@@ -144,7 +123,10 @@ const QcUnitList = ({ navigation }) => {
                         <Button
                           buttonStyle={{backgroundColor: `${bgFloor}`}}
                           title={v} 
-                          onPress={() => handleTipe(v)}
+                          onPress={() => {
+                            setModalUnitType(!modalUnitType);
+                            navigation.navigate('CM_CheckQR', { type, block: activeBlock, tower: activeTower, floor: activeFloor, tipe: v })
+                          }}
                         />
                       </View>
                     })
@@ -262,4 +244,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default QcUnitList;
+export default UnitList;

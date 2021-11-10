@@ -7,6 +7,7 @@ import { navigate } from "../navigationRef";
 import jwtDecode from "jwt-decode";
 import _ from "lodash";
 import axios from "axios";
+import * as FileSystem from 'expo-file-system';
 
 const catatMeterReducer = (state, action) => {
     switch (action.type) {
@@ -125,41 +126,54 @@ const doPostCatatMeter = dispatch => async (val) => {
         console.log('show localCM: ');
         console.log(localCM);
         // console.log(localCM.data);
-        // const uploadData = await new Promise.all(localCM.data.map(async header => {
-        //     header.waters = await new Promise.all(header.waters.map(async detail => {
-        //         const base64 = await FileSystem.readAsStringAsync(detail.foto || '', { encoding: 'base64' });
-        //         detail.foto = base64;
-        //         return detail;
-        //     }));
-        //     return header;
-        // }));
+        const uploadData = await new Promise.all(localCM.map(async header => {
+          if(header.waters){
+            header.waters = await new Promise.all(header.waters.map(async detail => {
+                const base64 = await FileSystem.readAsStringAsync(detail.foto || '', { encoding: 'base64' });
+                detail.foto = base64;
+                return detail;
+            }));
+            return header;
+          }
+
+          if(header.electrics){
+            header.electrics = await new Promise.all(header.electrics.map(async detail => {
+                const base64 = await FileSystem.readAsStringAsync(detail.foto || '', { encoding: 'base64' });
+                detail.foto = base64;
+                return detail;
+            }));
+            return header;
+          }          
+
+          if(header.waters_problem){
+            header.waters_problem = await new Promise.all(header.waters_problem.map(async detail => {
+                const base64 = await FileSystem.readAsStringAsync(detail.foto || '', { encoding: 'base64' });
+                detail.foto = base64;
+                return detail;
+            }));
+            return header;
+          }
+
+          if(header.electrics_problem){
+            header.electrics_problem = await new Promise.all(header.electrics_problem.map(async detail => {
+                const base64 = await FileSystem.readAsStringAsync(detail.foto || '', { encoding: 'base64' });
+                detail.foto = base64;
+                return detail;
+            }));
+            return header;
+          }
+        }));
 
         // console.log(uploadData);
+        const res = await easymoveinApi.post('/upload.php', JSON.stringify(localCM));
+        if(res.request.response > 0) return Alert.alert('done');
+        console.log(res.request.response);
 
-        // const uploadData = {
-        //   'water' : {
-        //     'unit_code' : '52022-1B-03-03A',
-        //     'bulan'     : '11',
-        //     'tahun'     : '2021',
-        //     'nomor_seri' : '90',
-        //     'pemakaian' : '0',
-        //     'foto'      : '',
-        //     'insert_by' : '',
-        //     'problem'   : ''
-        //   }
-        // };
-
-        // console.log(localCM.length);
-        // if(localCM.length > 0){
-          const res = await easymoveinApi.post('/upload.php', JSON.stringify(localCM));
-          console.log(res.request.response);
-        // }
-        
-        // const error = _.union(res.data.error);
-        // if(res.data.error > 0) return Alert.alert('Error', error.join('\n\n'));
+        const error = _.union(res.data.error);
+        if(res.data.error > 0) return Alert.alert('Error', error.join('\n\n'));
 
         // jangan lupa di uncomment
-        // await AsyncStorage.removeItem('localCM');
+        await AsyncStorage.removeItem('localCM');
     } catch (error) {
         console.log(error);
         processError(error);
