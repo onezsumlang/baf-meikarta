@@ -94,17 +94,30 @@ const Form = ({ navigation }) => {
     handleChange('foto', data.photo);
   }
 
+  const handleMeteran = (data) => {
+    setForm({
+      ...form,
+      meteran: data,
+      pemakaian: data ? parseFloat(data) - parseFloat(lastInput.meteran) : parseFloat(lastInput.meteran)
+    });
+  }
+
   const handleChange = (field, value) => {
     setForm({
       ...form,
-      pemakaian: field == 'meteran' && value ? parseFloat(value) - parseFloat(lastInput.meteran) : parseFloat(lastInput.meteran),
+      // pemakaian: field == 'meteran' && value ? parseFloat(value) - parseFloat(lastInput.meteran) : parseFloat(lastInput.meteran),
       [field]: value,
     });
   }
 
   const validation = () => {
     for (const [key, value] of Object.entries(form)) {
-      if(!value) return false;
+      if(key == 'pemakaian'){
+        if(!value) return true;
+      }else{
+        if(!value) return false;
+      }
+      
     }
 
     return true;
@@ -124,9 +137,11 @@ const Form = ({ navigation }) => {
         "pemakaian"   : form.pemakaian,
         "foto"        : form.foto,
         "insert_by"   : ((userDetail || {}).data || {}).id_user,
-        "problem"     : 0,
+        "problem"     : 1,
         "type"        : type,
-        "idx_problem" : listProblems[problemSelected].idx,
+        "idx_problem" : problemSelected == null ? '0' : listProblems[problemSelected].idx,
+        "qc_id"       : ((userDetail || {}).data || {}).id_user,
+        "qc_check"    : problemSelected == null ? '0' : '2',
         "insert_date" : moment().format('YYYY-MM-DD HH:mm:ss')
       }]
     };
@@ -140,9 +155,11 @@ const Form = ({ navigation }) => {
         "pemakaian"   : form.pemakaian,
         "foto"        : form.foto,
         "insert_by"   : ((userDetail || {}).data || {}).id_user,
-        "problem"     : 0,
+        "problem"     : 1,
         "type"        : type,
-        "idx_problem" : listProblems[problemSelected].idx,
+        "idx_problem" : problemSelected == null ? '0' : listProblems[problemSelected].idx,
+        "qc_id"       : ((userDetail || {}).data || {}).id_user,
+        "qc_check"    : problemSelected == null ? '0' : '2',
         "insert_date" : moment().format('YYYY-MM-DD HH:mm:ss')
       }]
     };
@@ -167,7 +184,7 @@ const Form = ({ navigation }) => {
     setModalProblems(!modalProblems);
   }
 
-  // console.log(form);
+  console.log(form);
 
   return (
     <>
@@ -243,7 +260,8 @@ const Form = ({ navigation }) => {
           <View style={styles.row}>
             <Text style={[styles.textMD, { width: "30%" }]}>Meteran</Text>
             <Text style={styles.textMD}>:</Text>
-            <TextInput style={styles.input} onChangeText={(text) => handleChange('meteran', text)}></TextInput>
+            {/* <TextInput style={styles.input} onChangeText={(text) => handleChange('meteran', text)}></TextInput> */}
+            <TextInput style={styles.input} onChangeText={(text) => handleMeteran(text)}></TextInput>
           </View>
           <View style={styles.row}>
             <Text style={[styles.textMD, { width: "30%" }]}>Pemakaian</Text>
@@ -275,27 +293,32 @@ const Form = ({ navigation }) => {
           <View style={styles.btnContainer}>
             <Button 
               buttonStyle={{width: '50%'}}
-              color="#72cc50"
-              title="OK"
-              // onPress={() => doSubmit()}
-              onPress={() => {
-                const noScan = idxNoScan.filter(element => element == listProblems[problemSelected].idx);
-                // console.log(noScan);
-                if(noScan.length > 0 ){
-                  doSubmit();
-                }else{
-                  setModalCheckQr(true);
-                }              
-              }
-              }
+              color="#d1193e"
+              title="PROBLEM"
+              onPress={() => handleProblem()}
             />
           </View>
           <View style={styles.btnContainer}>
             <Button 
               buttonStyle={{width: '50%'}}
-              color="#d1193e"
-              title="PROBLEM"
-              onPress={() => handleProblem()}
+              color="#72cc50"
+              title="OK"
+              // onPress={() => doSubmit()}
+              onPress={() => {
+                // console.log(problemSelected);
+                const xListProblem = problemSelected == null ? 'here' : listProblems[problemSelected].idx;
+                // console.log('tes');
+                // console.log(xListProblem);
+                const noScan = idxNoScan.filter(element => element == xListProblem);
+                // console.log(noScan);
+                if(noScan.length > 0 || xListProblem !== 'here'){
+                  // console.log('submit');
+                  doSubmit();
+                }else{
+                  // console.log('check qr');
+                  setModalCheckQr(true);
+                }                     
+              }}
             />
           </View>
         </View>
