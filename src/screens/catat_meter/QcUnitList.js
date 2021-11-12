@@ -44,6 +44,16 @@ const QcUnitList = ({ navigation }) => {
     setModalUnitType(true);
   }
 
+  const checkColorFloor = (floor) => {
+    const filtered = filteredUnits.filter(v => v.floor == floor);
+    return type == 'Water' ? filtered[0].water_color : filtered[0].electric_color;
+  }
+
+  const checkColorTipe = (tipe) => {
+    const filtered = filteredUnits.filter(v => v.tipe == tipe);
+    return type == 'Water' ? filtered[0].water_color : filtered[0].electric_color;
+  }
+
   const checkStatusFloor = (floor) => {
     const notDone_Water = catatMeterUnits.filter(v => v.ho == 1 && v.floor == floor && v.water != 2);
     const notDone_Electric = catatMeterUnits.filter(v => v.ho == 1 && v.floor == floor && v.electric != 2);
@@ -107,7 +117,8 @@ const QcUnitList = ({ navigation }) => {
         <View style={styles.row}>
         {uniqFloor.map((v, key) => {
           const isDone = checkStatusFloor(v);
-          let bgFloor = isDone ? '#000000' : '#d1193e';
+          const floorColor = checkColorFloor(v);
+          let bgFloor = isDone ? floorColor : '#b4c6e7';
 
           return <View key={key} style={styles.container}>
             <Button 
@@ -138,7 +149,8 @@ const QcUnitList = ({ navigation }) => {
                   {
                     uniqType.map((v, key) => {
                       const isDone = checkStatusType(v);
-                      let bgFloor = isDone ? '#9DB300' : '#8ecae6';
+                      const floorColor = checkColorTipe(v);
+                      let bgFloor = isDone ? floorColor : '#b4c6e7';
 
                       return <View key={key} style={styles.container}>
                         <Button
