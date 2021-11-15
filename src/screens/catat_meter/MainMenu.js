@@ -3,11 +3,15 @@ import { StyleSheet, View, Text } from "react-native";
 import {Button, Badge} from "react-native-elements";
 import { NavigationEvents, SafeAreaView } from "react-navigation";
 import { Context as AuthContext } from "../../context/AuthContext";
+import { Context as CatatMeterContext } from "../../context/CatatMeterContext";
 
 const MainMenu = ({ navigation }) => {
     const { state: authState } = useContext(AuthContext);
+    const { listSchedule } = useContext(CatatMeterContext);
     const { userDetail } = authState;
     const profileID = ((userDetail || {}).data || {}).profile_id;
+
+    console.log(listSchedule);
 
     return (
     <>

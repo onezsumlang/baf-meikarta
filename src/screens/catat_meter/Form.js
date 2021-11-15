@@ -141,7 +141,7 @@ const Form = ({ navigation }) => {
         "type"        : type,
         "idx_problem" : problemSelected == null ? '0' : listProblems[problemSelected].idx,
         "qc_id"       : ((userDetail || {}).data || {}).id_user,
-        "qc_check"    : problemSelected == null ? '0' : '2',
+        "qc_check"    : problemSelected == null ? '1' : '2',
         "insert_date" : moment().format('YYYY-MM-DD HH:mm:ss')
       }]
     };
@@ -159,7 +159,7 @@ const Form = ({ navigation }) => {
         "type"        : type,
         "idx_problem" : problemSelected == null ? '0' : listProblems[problemSelected].idx,
         "qc_id"       : ((userDetail || {}).data || {}).id_user,
-        "qc_check"    : problemSelected == null ? '0' : '2',
+        "qc_check"    : problemSelected == null ? '1' : '2',
         "insert_date" : moment().format('YYYY-MM-DD HH:mm:ss')
       }]
     };

@@ -76,11 +76,16 @@ const fetchRecords = dispatch => async () => {
     
       const resProblem = await axios.get('https://easymovein.id/apieasymovein/reading_qr/get_master_problem_baf.php');
 
+      const resSchedule = await easymoveinApi.get('/get_qc_cm_schedule.php?block='+ block);
+
       const data = {
         listElectric: resElectric.data.list_electric || [],
         listWater: resWater.data.list_water || [],
-        listProblem: resProblem.data.data_problem || []
+        listProblem: resProblem.data.data_problem || [],
+        listSchedule: resSchedule.data.data_schedule || []
       }
+
+      // console.log(data);
 
       await AsyncStorage.setItem('CM_RECORDS', JSON.stringify(data));
       dispatch({ type: 'RECORDS_FETCH', payload: data });
@@ -186,5 +191,5 @@ export const { Provider, Context} = createDataContext(
     { doPostCatatMeter, fetchUnits, fetchRecords, addCatatMeter, addCatatMeterQc },
 
     // default state reduce
-    { loading: false, catatMeterUnits: [], listElectric: [], listWater: [], listCatatMeter: [], listProblem: [] }
+    { loading: false, catatMeterUnits: [], listElectric: [], listWater: [], listCatatMeter: [], listProblem: [], listSchedule: [] }
 )

@@ -65,6 +65,11 @@ const QcUnitList = ({ navigation }) => {
     const notDone_Water = catatMeterUnits.filter(v => v.ho == 1 && v.floor == activeFloor && v.tipe == type && v.water != 2);
     const notDone_Electric = catatMeterUnits.filter(v => v.ho == 1 && v.floor == activeFloor && v.tipe == type && v.electric != 2);
 
+    
+    if(activeFloor == '01' || activeFloor == '02'){
+      console.log(notDone_Water);
+    }
+
     return type == 'Water' ? notDone_Water.length == 0 : notDone_Electric.length == 0;
   }
 
@@ -149,8 +154,8 @@ const QcUnitList = ({ navigation }) => {
                   {
                     uniqType.map((v, key) => {
                       const isDone = checkStatusType(v);
-                      const floorColor = checkColorTipe(v);
-                      let bgFloor = isDone ? floorColor : '#b4c6e7';
+                      const typeColor = checkColorTipe(v);
+                      let bgFloor = isDone ? typeColor : '#b4c6e7';
 
                       return <View key={key} style={styles.container}>
                         <Button
