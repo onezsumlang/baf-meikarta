@@ -4,14 +4,23 @@ import {Button, Badge} from "react-native-elements";
 import { NavigationEvents, SafeAreaView } from "react-navigation";
 import { Context as AuthContext } from "../../context/AuthContext";
 import { Context as CatatMeterContext } from "../../context/CatatMeterContext";
+import moment from "moment";
+import _ from "lodash";
+
 
 const MainMenu = ({ navigation }) => {
     const { state: authState } = useContext(AuthContext);
-    const { listSchedule } = useContext(CatatMeterContext);
+    const { state } = useContext(CatatMeterContext);
+    const { listSchedule } = state;
     const { userDetail } = authState;
     const profileID = ((userDetail || {}).data || {}).profile_id;
 
-    console.log(listSchedule);
+    const currentDate = moment().format('YYYY-MM-DD');
+
+    const QC_WATER_Sched = listSchedule.filter(v => v.type == 'QC_WATER' && v.schedule_date == currentDate);
+    const QC_ELECTRIC_Sched = listSchedule.filter(v => v.type == 'QC_ELECTRIC' && v.schedule_date == currentDate);
+    const CM_WATER_Sched = listSchedule.filter(v => v.type == 'CM_WATER' && v.schedule_date == currentDate);
+    const CM_ELECTRIC_Sched = listSchedule.filter(v => v.type == 'CM_ELECTRIC' && v.schedule_date == currentDate);
 
     return (
     <>
@@ -19,40 +28,95 @@ const MainMenu = ({ navigation }) => {
         {/* <SafeAreaView> */}
             <SafeAreaView style={styles.screen}>
                 <View style={styles.row}>
-                    <View style={styles.container}>
-                        <Button 
-                            buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
-                            titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
-                            title="METER AIR QC" 
-                            color
-                            onPress={()=> navigation.navigate('CM_QcUnitList', { headerTitle: 'METER AIR READING QC', type: 'Water' })} 
-                        />
-                    </View>
-                    <View style={styles.container}>
-                        <Button 
-                            buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
-                            titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
-                            title="METER AIR READING" 
-                            color
-                            onPress={()=> navigation.navigate('CM_UnitList', { headerTitle: 'METER AIR READING', type: 'Water' })} 
-                        />
-                    </View>
-                    <View style={styles.container}>
-                        <Button 
-                            buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
-                            titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
-                            title="METER LISTRIK QC" 
-                            onPress={()=> navigation.navigate('CM_QcUnitList', { headerTitle: 'METER LISTRIK READING QC', type: 'Electric' })} 
-                        />
-                    </View>
-                    <View style={styles.container}>
-                        <Button 
-                            buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
-                            titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
-                            title="METER LISTRIK READING" 
-                            onPress={()=> navigation.navigate('CM_UnitList', { headerTitle: 'METER LISTRIK READING', type: 'Electric' })} 
-                        />
-                    </View>
+                    {QC_WATER_Sched.length > 0 &&
+                        <View style={styles.container}>                            
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
+                                titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
+                                title="METER AIR QC" 
+                                color
+                                onPress={()=> navigation.navigate('CM_QcUnitList', { headerTitle: 'METER AIR READING QC', type: 'Water' })} 
+                            />                            
+                        </View>
+                    }
+
+                    {QC_WATER_Sched.length == 0 && 
+                        <View style={styles.container}>
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#ccc' }]}
+                                titleStyle={{ color: 'black', fontWeight: 'bold', width: '100%' }}
+                                title="METER AIR QC NO SCHEDULE" 
+                                color
+                            />  
+                        </View>
+                    }
+
+                    {CM_WATER_Sched.length > 0 &&
+                        <View style={styles.container}>
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
+                                titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
+                                title="METER AIR READING" 
+                                color
+                                onPress={()=> navigation.navigate('CM_UnitList', { headerTitle: 'METER AIR READING', type: 'Water' })} 
+                            />
+                        </View>
+                    }
+
+                    {CM_WATER_Sched.length == 0 && 
+                        <View style={styles.container}>
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#ccc' }]}
+                                titleStyle={{ color: 'black', fontWeight: 'bold', width: '100%' }}
+                                title="METER AIR READING NO SCHEDULE" 
+                                color
+                            />  
+                        </View>
+                    }
+
+                    {QC_ELECTRIC_Sched.length > 0 &&
+                        <View style={styles.container}>
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
+                                titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
+                                title="METER LISTRIK QC" 
+                                onPress={()=> navigation.navigate('CM_QcUnitList', { headerTitle: 'METER LISTRIK READING QC', type: 'Electric' })} 
+                            />
+                        </View>
+                    }
+
+                    {QC_ELECTRIC_Sched.length == 0 && 
+                        <View style={styles.container}>
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#ccc' }]}
+                                titleStyle={{ color: 'black', fontWeight: 'bold', width: '100%' }}
+                                title="METER LISTRIK QC NO SCHEDULE" 
+                                color
+                            />  
+                        </View>
+                    }
+
+                    {CM_ELECTRIC_Sched.length > 0 &&
+                        <View style={styles.container}>
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#fff' }]}
+                                titleStyle={{ color: 'black', fontWeight: 'bold', width: '70%' }}
+                                title="METER LISTRIK READING" 
+                                onPress={()=> navigation.navigate('CM_UnitList', { headerTitle: 'METER LISTRIK READING', type: 'Electric' })} 
+                            />
+                        </View>
+                    }
+
+                    {CM_ELECTRIC_Sched.length == 0 && 
+                        <View style={styles.container}>
+                            <Button 
+                                buttonStyle={[styles.buttonChild, { backgroundColor: '#ccc' }]}
+                                titleStyle={{ color: 'black', fontWeight: 'bold', width: '100%' }}
+                                title="METER LISTRIK READING NO SCHEDULE" 
+                                color
+                            />  
+                        </View>
+                    }
                 </View>
             </SafeAreaView>
             
