@@ -95,6 +95,9 @@ export const getStatusFloor = (blocks, floor, tower) => {
     const { userDetail } = authState;
     const { listLog } = reportState;
 
+    // console.log(userDetail);
+
+    // console.log(schedulePattern);
     // if(!currentShift.start && currentShift.start != 0) return 'future';
     const hourNow = moment().format('H');
     const startDateTime = moment(((userDetail || {}).data || {}).start_datetime).format('YYYY-MM-DD HH:mm:ss');
@@ -104,6 +107,7 @@ export const getStatusFloor = (blocks, floor, tower) => {
     if(dateNow < startDateTime || dateNow > endDateTime) return 'future';
 
     let job = ((userDetail || {}).data || {}).profile_id;
+    
     // if(['21','14','12'].includes(job) === false) job = 12;
     
     // untuk dapat jam ke berapa dr shift tsb, 

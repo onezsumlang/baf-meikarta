@@ -43,19 +43,25 @@ const fetchUnits = dispatch => async () => {
     try {
         dispatch({ type: 'SET_LOADING', payload: true });
         const token = await AsyncStorage.getItem('token');
-        const userDetail = jwtDecode(token);
+        const userDetail = jwtDecode(token); 
+        // console.log(userDetail);
         
         let block = userDetail.data.absensi_block || '51022';
 
         if(block == 'Non Blocks') block = 'non_blocks';
 
         const response = await axios.get('https://easymovein.id/apieasymovein/reading_qr/get_mkrt_units_all.php?blocks='+ block);
+        // console.log(response);
 
         const data = response.data || {};
+        // console.log(data);
 
-        await AsyncStorage.setItem('CM_UNITS', JSON.stringify(data.list_mkrt_unit));
-        dispatch({ type: 'UNITS_FETCH', payload: data.list_mkrt_unit });
+        if(data.status){
+            await AsyncStorage.setItem('CM_UNITS', JSON.stringify(data.list_mkrt_unit));
+            dispatch({ type: 'UNITS_FETCH', payload: data.list_mkrt_unit });
+        }
     } catch (error) {
+        console.log(error);
         processError(error);
         Alert.alert('Error', `No signal, failed to fetch units`);
     }
@@ -128,8 +134,8 @@ const addCatatMeterQc = dispatch => async (data) => {
 const doPostCatatMeter = dispatch => async (val) => {
     try {
         const localCM = await JSON.parse(await AsyncStorage.getItem('localCM')) || [];
-        console.log('show localCM: ');
-        console.log(localCM);
+        // console.log('show localCM: ');
+        // console.log(localCM);
         // console.log(localCM.data);
         const uploadData = await new Promise.all(localCM.map(async header => {
           if(header.waters){
@@ -172,7 +178,7 @@ const doPostCatatMeter = dispatch => async (val) => {
         // console.log(uploadData);
         const res = await easymoveinApi.post('/upload.php', JSON.stringify(localCM));
         if(res.request.response > 0) return Alert.alert('done');
-        console.log(res.request.response);
+        // console.log(res.request.response);
 
         const error = _.union(res.data.error);
         if(res.data.error > 0) return Alert.alert('Error', error.join('\n\n'));

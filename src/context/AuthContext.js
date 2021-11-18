@@ -49,7 +49,7 @@ const signin = (dispatch) => async ({ email, password }, callback) => {
         if(!response.data.status) throw new Error(response.data.message);
 
         await AsyncStorage.setItem('token', response.data.token);
-        const userDetail = jwtDecode(response.data.token);
+        const userDetail = jwtDecode(response.data.token); 
     
         dispatch({ type: 'AUTH_SIGNIN', payload: response.data.token});
         dispatch({ type: 'AUTH_SET_USERS', payload: userDetail});

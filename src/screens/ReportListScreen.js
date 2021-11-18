@@ -26,11 +26,14 @@ const ReportListScreen = ({ navigation }) => {
 
   const dataUnit = (master_unit || []).filter(v => v.blocks == activeBlock && v.tower == activeTower);
 
+  // console.log(dataUnit);
+
   return (
     <>
       <NavigationEvents 
         onWillFocus={async() => {
           const serverSchedule = JSON.parse(await AsyncStorage.getItem('serverSchedule')) || [];
+          // console.log('serverSchedule' + serverSchedule);
           const serverSchedulePattern = JSON.parse(await AsyncStorage.getItem('serverSchedulePattern')) || [];
           if(serverSchedule.length == 0) Alert.alert('Info', 'No schedule, please try to sync');
           await getCurrentShift();
@@ -68,6 +71,7 @@ const ReportListScreen = ({ navigation }) => {
           {dataUnit.map((v, key) => {
 
             const statusFloor = getStatusFloor(v.blocks, v.floor, v.tower);
+            // console.log(v.blocks + ' ' + v.floor + ' ' + statusFloor);
             let bgFloor = '#000';
             if(statusFloor == 'active') bgFloor = '#6598eb';
             if(statusFloor == 'on progress') bgFloor = '#dfe305';
