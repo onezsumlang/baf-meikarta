@@ -17,10 +17,11 @@ const ReportDetailScreen = ({ navigation }) => {
   const [checkList, setCheckList] = useState([]);
 
   const profileID = authState.userDetail.data.profile_id;
+  console.log(profileID)
 
   // console.log('Asset Item', currentReportAsset);
   const validationSubmit = () => {
-    if(checkList.length < listCategory.length){
+    if(checkList.length < listCategory.length && profileID != '101'){
       Alert.alert('Info', 'Please complete the form');
       return false;
     }
