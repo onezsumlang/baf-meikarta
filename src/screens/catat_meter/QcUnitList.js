@@ -11,6 +11,8 @@ const QcUnitList = ({ navigation }) => {
   const { catatMeterUnits, listElectric, listWater, listProblem, loading } = state;
   const listData = type == 'Electric' ? listElectric : listWater;
 
+  // console.log(catatMeterUnits);
+
   // modal for unit type
   const [modalUnitType, setModalUnitType] = useState(false);
 
@@ -31,6 +33,11 @@ const QcUnitList = ({ navigation }) => {
 
   const filteredUnits2 = catatMeterUnits.filter(v => v.block = activeBlock && v.tower == activeTower && v.floor == activeFloor);
   const uniqType = _.sortBy(_.uniq(_.map(filteredUnits2, 'tipe'))) || [];
+  const uniqWaterColor = _.sortBy(_.uniq(_.map(filteredUnits2, ['tipe','water_color']))) || [];
+  // console.log(uniqWaterColor);
+
+  // const xfiltered = filteredUnits2.filter(v => v.tipe == tipe);
+  // return type == 'Water' ? filtered[0].water_color : filtered[0].electric_color;
 
   useEffect(() => {
     const getLocalCM = async () => {
@@ -50,14 +57,14 @@ const QcUnitList = ({ navigation }) => {
   }
 
   const checkColorTipe = (tipe) => {
-    const filtered = filteredUnits.filter(v => v.tipe == tipe);
+    const filtered = filteredUnits2.filter(v => v.tipe == tipe);
     return type == 'Water' ? filtered[0].water_color : filtered[0].electric_color;
   }
 
   const checkStatusFloor = (floor) => {
     const notDone_Water = catatMeterUnits.filter(v => v.ho == 1 && v.floor == floor && v.water != 2);
     const notDone_Electric = catatMeterUnits.filter(v => v.ho == 1 && v.floor == floor && v.electric != 2);
-
+    
     return type == 'Water' ? notDone_Water.length == 0 : notDone_Electric.length == 0;
   }
 
@@ -150,7 +157,10 @@ const QcUnitList = ({ navigation }) => {
                     uniqType.map((v, key) => {
                       const isDone = checkStatusType(v);
                       const floorColor = checkColorTipe(v);
-                      let bgFloor = isDone ? floorColor : '#b4c6e7';
+                      console.log(v);
+                      console.log(floorColor);
+                      // let bgFloor = isDone ? floorColor : '#b4c6e7';
+                      let bgFloor = floorColor;
 
                       return <View key={key} style={styles.container}>
                         <Button
